@@ -14,8 +14,7 @@ class MyProtocol(ssdp.SimpleServiceDiscoveryProtocol):
 
 
 async def start(loop):
-    connect = loop.create_datagram_endpoint(MyProtocol, family=socket.AF_INET)
-    transport, protocol = await connect
+    transport, protocol = await loop.create_datagram_endpoint(MyProtocol, family=socket.AF_INET)
     logging.debug("Listening for SSDP announcements")
 
     notify = ssdp.SSDPRequest('NOTIFY')
