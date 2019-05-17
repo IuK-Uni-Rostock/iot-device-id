@@ -27,7 +27,7 @@ class LocalDevice(CharacterisableMixin):
     def __init__(self, ip):
         super().__init__()
         self.ip = ip
-        self.device_type = None
+        self.device_types = []
 
 
 class DeviceTypeDB(object):
@@ -45,7 +45,7 @@ class DeviceTypeDB(object):
         if not os.path.exists(DeviceTypeDB.devices_location):
             os.mkdir(DeviceTypeDB.devices_location)
         devices = {}
-        for d in glob.glob("{}/*.json".format(DeviceTypeDB.devices_location)):
+        for d in glob.glob("{}/*".format(DeviceTypeDB.devices_location)):
             with open(d, "rb") as f:
                 device = pickle.load(f)
                 devices[device.uuid] = device
@@ -63,14 +63,14 @@ class DeviceTypeDB(object):
         Uses the Sørensen–Dice coefficient to quantify the similarity.
         """
         result = []
-        for device in self.device_types:
-            intersection = len(device.characteristics.intersection(local_device))
+        for device in self.device_types.values():
+            intersection = len(device.characteristics.intersection(local_device.characteristics))
             dice_index = 2 * intersection / (len(device.characteristics) + len(local_device.characteristics))
             result.append((dice_index, device))
         return sorted(result, key=lambda x: x[0])
 
-    def find_matching_device_type(self, local_device: LocalDevice) -> DeviceType:
-        return self.find_matching_device_types(local_device)[0][1]
+    def find_matching_device_type(self, local_device: LocalDevice) -> (float, DeviceType):
+        return self.find_matching_device_types(local_device)[0]
 
     def add(self, device_type: DeviceType):
         self.device_types[device_type.uuid] = device_type
