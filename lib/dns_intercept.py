@@ -10,7 +10,7 @@ async def start(on_receive):
         async def handle(self, data, addr):
             msg = DNSMessage.parse(data)
             logging.debug("DNS Request for {} from {}".format(msg.qd, addr))
-            on_receive(addr, "DNS", msg.qd)
+            on_receive(addr[0], "DNS", str(msg.qd[0]))
 
             # Send a response:
             await super().handle(data, addr)

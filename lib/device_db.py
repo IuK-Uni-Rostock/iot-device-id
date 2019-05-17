@@ -54,7 +54,7 @@ class DeviceTypeDB(object):
     @staticmethod
     def get_db():
         if DeviceTypeDB.db is None:
-            DeviceType.db = DeviceTypeDB()
+            DeviceTypeDB.db = DeviceTypeDB()
         return DeviceTypeDB.db
 
     def find_matching_device_types(self, local_device: LocalDevice) -> [(float, DeviceType)]:

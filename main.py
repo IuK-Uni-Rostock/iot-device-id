@@ -9,7 +9,7 @@ from lib.device_db import DeviceType, DeviceTypeDB
 logging.basicConfig(level=logging.DEBUG)
 
 
-def start_listeners(on_receive= lambda *_: None):
+def start_listeners(on_receive):
     loop = asyncio.get_event_loop()
     loop.run_until_complete(dns_intercept.start(on_receive))
     loop.run_until_complete(ssdp_discovery.start(loop, on_receive))
@@ -31,12 +31,13 @@ def record(ip, name):
 
     def on_receive(remote_ip, type, record):
         if remote_ip != ip:
+            logging.debug("Ignoring request from {} (!= {})".format(remote_ip, ip))
             return
         device_type.add_characteristic(type, record)
         DeviceTypeDB.get_db().add(device_type)
         logging.info("Saving {} record '{}' for device type {}".format(type, record, device_type))
 
-    start_listeners(on_receive=on_receive)
+    start_listeners(on_receive)
 
 
 @click.command()
