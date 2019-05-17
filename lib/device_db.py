@@ -67,7 +67,7 @@ class DeviceTypeDB(object):
             intersection = len(device.characteristics.intersection(local_device.characteristics))
             dice_index = 2 * intersection / (len(device.characteristics) + len(local_device.characteristics))
             result.append((dice_index, device))
-        return sorted(result, key=lambda x: x[0])
+        return sorted(result, key=lambda x: x[0], reverse=True)
 
     def find_matching_device_type(self, local_device: LocalDevice) -> (float, DeviceType):
         return self.find_matching_device_types(local_device)[0]

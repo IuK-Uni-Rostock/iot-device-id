@@ -56,10 +56,10 @@ def detect():
         local_devices[remote_ip].device_types = DeviceTypeDB.get_db().find_matching_device_types(local_devices[remote_ip])
         t.reset()
         click.clear()
-        t.header(["", "Local IP address", "Device Type", "Certainty"])
+        t.header(["", "Local IP address", "Device Type", "Match"])
         for i, (ip, ld) in enumerate(local_devices.items()):
             dt = ld.device_types[0] if len(ld.device_types) else (0.0, "Unknown")
-            t.add_row(["#{}".format(i+1), ip, dt[1], "{}% likely".format(int(dt[0] * 100))])
+            t.add_row(["#{}".format(i+1), ip, dt[1], "{}%".format(int(dt[0] * 100))])
         print(t.draw())
     start_listeners(on_receive)
 
