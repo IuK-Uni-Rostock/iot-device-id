@@ -4,28 +4,25 @@ from async_dns import DNSMessage
 from async_dns.server import DNSProtocol, DNSMixIn, DNSDatagramProtocol, DNSServer
 
 
-class OurDNSMixIn(DNSMixIn):
+async def start(on_receive):
+    class OurDNSMixIn(DNSMixIn):
 
-    async def handle(self, data, addr):
-        msg = DNSMessage.parse(data)
-        logging.debug("Request for {} from {}".format(msg.qd, addr))
+        async def handle(self, data, addr):
+            msg = DNSMessage.parse(data)
+            logging.debug("DNS Request for {} from {}".format(msg.qd, addr))
+            on_receive(addr, "DNS", msg.qd)
 
-        # Send a response:
-        await super().handle(data, addr)
+            # Send a response:
+            await super().handle(data, addr)
 
+    class OurDNSProtocol(OurDNSMixIn, DNSProtocol):
+        pass
 
-class OurDNSProtocol(OurDNSMixIn, DNSProtocol):
-    pass
+    class OurDNSDatagramProtocol(OurDNSMixIn, DNSDatagramProtocol):
+        pass
 
+    server = DNSServer(protocol_classes=(OurDNSProtocol, OurDNSDatagramProtocol))
 
-class OurDNSDatagramProtocol(OurDNSMixIn, DNSDatagramProtocol):
-    pass
-
-
-server = DNSServer(protocol_classes=(OurDNSProtocol, OurDNSDatagramProtocol))
-
-
-async def start():
     tcpserver, udptransport = await server.start_server()
 
     if tcpserver:

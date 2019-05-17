@@ -4,14 +4,15 @@ import logging
 import click
 
 from lib import dns_intercept, ssdp_discovery
+from lib.device_db import DeviceType, DeviceTypeDB
 
 logging.basicConfig(level=logging.DEBUG)
 
 
-def start_listeners():
+def start_listeners(on_receive= lambda *_: None):
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(dns_intercept.start())
-    loop.run_until_complete(ssdp_discovery.start(loop))
+    loop.run_until_complete(dns_intercept.start(on_receive))
+    loop.run_until_complete(ssdp_discovery.start(loop, on_receive))
 
     loop.run_forever()
 
@@ -26,8 +27,16 @@ def cli():
 @click.option("--name", prompt="Device name", help="Name of the target device")
 def record(ip, name):
     """Record a new device into the database."""
-    print(ip, name)
-    start_listeners()
+    device_type = DeviceType(name)
+
+    def on_receive(remote_ip, type, record):
+        if remote_ip != ip:
+            return
+        device_type.add_characteristic(type, record)
+        DeviceTypeDB.get_db().add(device_type)
+        logging.info("Saving {} record '{}' for device type {}".format(type, record, device_type))
+
+    start_listeners(on_receive=on_receive)
 
 
 @click.command()
