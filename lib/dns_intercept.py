@@ -4,7 +4,7 @@ from async_dns import DNSMessage
 from async_dns.server import DNSProtocol, DNSMixIn, DNSDatagramProtocol, DNSServer
 
 
-async def start(on_receive):
+async def start(on_receive, port=53):
     class OurDNSMixIn(DNSMixIn):
 
         async def handle(self, data, addr):
@@ -21,7 +21,7 @@ async def start(on_receive):
     class OurDNSDatagramProtocol(OurDNSMixIn, DNSDatagramProtocol):
         pass
 
-    server = DNSServer(protocol_classes=(OurDNSProtocol, OurDNSDatagramProtocol))
+    server = DNSServer(protocol_classes=(OurDNSProtocol, OurDNSDatagramProtocol), port=port)
 
     tcpserver, udptransport = await server.start_server()
 

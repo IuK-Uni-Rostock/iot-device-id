@@ -35,7 +35,7 @@ setup(
     packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
     install_requires=required,
     extras_require={
-        'dev': ['pytest-cov', 'coveralls']
+        'dev': ['pytest-cov', 'coveralls', 'pytest-asyncio']
     },
     include_package_data=True,
     license='Apache',
