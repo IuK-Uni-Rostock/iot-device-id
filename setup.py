@@ -34,6 +34,9 @@ setup(
     url=URL,
     packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
     install_requires=required,
+    extras_require={
+        'dev': ['pytest-cov', 'coveralls']
+    },
     include_package_data=True,
     license='Apache',
     classifiers=[
