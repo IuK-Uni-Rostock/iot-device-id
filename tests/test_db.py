@@ -36,3 +36,14 @@ def test_find_matching_device(tmp_path):
     assert dt.characteristics == ld.characteristics
     assert match[1].name == dt.name
     assert match[0] == 1.0
+
+
+def test_mkdir(tmp_path):
+    DeviceTypeDB.devices_location = str(tmp_path) + "/devices"
+    DeviceTypeDB.db = None
+    dt = DeviceType("test_device")
+    DeviceTypeDB.get_db().add(dt)
+
+
+def test_str():
+    str(DeviceTypeDB.get_db())
