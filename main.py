@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import shutil
 
 import click
 from texttable import Texttable
