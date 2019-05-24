@@ -1,4 +1,5 @@
-texttable
+texttable==1.6.1
 click==7.0
 async-dns==1.0.0
 ssdp==1.0.1
+aiozeroconf==0.1.8

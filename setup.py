@@ -19,7 +19,7 @@ VERSION = '0.1.0'
 here = os.path.abspath(os.path.dirname(__file__))
 
 long_description = open("{}/README.md".format(here)).read()
-required = open("{}/requirements.txt".format(here)).readlines()
+required = open("{}/lib/requirements.txt".format(here)).readlines()
 
 # Where the magic happens:
 setup(

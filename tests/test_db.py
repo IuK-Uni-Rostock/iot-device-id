@@ -46,4 +46,4 @@ def test_mkdir(tmp_path):
 
 
 def test_str():
-    str(DeviceTypeDB.get_db())
+    str(DeviceType("test device"))

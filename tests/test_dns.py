@@ -1,9 +1,8 @@
 import asyncio
-import subprocess
 
 import pytest
 
-from lib.dns_intercept import start
+from lib.discovery.dns import start
 
 
 class Receiver:

@@ -5,7 +5,7 @@ import shutil
 import click
 from texttable import Texttable
 
-from lib import dns_intercept, ssdp_discovery
+from lib.discovery import ssdp, dns, mdns
 from lib.device_db import DeviceType, DeviceTypeDB, LocalDevice
 
 logging.basicConfig(level=logging.DEBUG)
@@ -13,8 +13,9 @@ logging.basicConfig(level=logging.DEBUG)
 
 def start_listeners(on_receive):
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(dns_intercept.start(on_receive))
-    loop.run_until_complete(ssdp_discovery.start(loop, on_receive))
+    loop.run_until_complete(dns.start(on_receive))
+    loop.run_until_complete(ssdp.start(on_receive))
+    loop.run_until_complete(mdns.start(on_receive))
 
     loop.run_forever()
 
@@ -46,20 +47,21 @@ def record(ip, name):
 def detect():
     """Detect IoT devices on the local network."""
     local_devices = {}
-    t = Texttable()
-    t.set_max_width(shutil.get_terminal_size((80, 20)).columns)
 
     def on_receive(remote_ip, type, record):
+        t = Texttable()
+        t.set_max_width(300)
         if remote_ip not in local_devices:
             local_devices[remote_ip] = LocalDevice(remote_ip)
         local_devices[remote_ip].add_characteristic(type, record)
         local_devices[remote_ip].device_types = DeviceTypeDB.get_db().find_matching_device_types(local_devices[remote_ip])
-        t.reset()
         click.clear()
         t.header(["", "Local IP address", "Device Type", "Match"])
         for i, (ip, ld) in enumerate(local_devices.items()):
-            dt = ld.device_types[0] if len(ld.device_types) else (0.0, "Unknown")
-            t.add_row(["#{}".format(i+1), ip, dt[1], "{}%".format(int(dt[0] * 100))])
+            # If likelihood is > 0
+            if len(ld.device_types) and ld.device_types[0][0] > 0:
+                dt = ld.device_types[0]
+                t.add_row(["#{}".format(i+1), ip, dt[1], "{}%".format(int(dt[0] * 100))])
         print(t.draw())
     start_listeners(on_receive)
 
