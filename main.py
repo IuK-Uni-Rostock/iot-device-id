@@ -1,13 +1,17 @@
 import asyncio
 import logging
+import shutil
 
 import click
 from texttable import Texttable
 
-from lib.discovery import ssdp, dns, mdns
+from lib.discovery import ssdp, dns, mdns, arp
 from lib.device_db import DeviceType, DeviceTypeDB, LocalDevice
+from lib.utils import LogStream
 
-logging.basicConfig(level=logging.DEBUG)
+
+log_stream = LogStream()
+logging.basicConfig(level=logging.DEBUG, stream=log_stream, format="%(asctime)s;%(levelname)s;%(message)s")
 
 
 def start_listeners(on_receive):
@@ -15,6 +19,7 @@ def start_listeners(on_receive):
     loop.run_until_complete(dns.start(on_receive))
     loop.run_until_complete(ssdp.start(on_receive))
     loop.run_until_complete(mdns.start(on_receive))
+    loop.run_until_complete(arp.start(on_receive))
 
     loop.run_forever()
 
@@ -48,8 +53,9 @@ def detect():
     local_devices = {}
 
     def on_receive(remote_ip, type, record):
+        tsize = shutil.get_terminal_size((80, 20))
         t = Texttable()
-        t.set_max_width(300)
+        t.set_max_width(tsize.columns)
         if remote_ip not in local_devices:
             local_devices[remote_ip] = LocalDevice(remote_ip)
         local_devices[remote_ip].add_characteristic(type, record)
@@ -62,6 +68,9 @@ def detect():
                 dt = ld.device_types[0]
                 t.add_row(["#{}".format(i+1), ip, dt[1], "{}%".format(int(dt[0] * 100))])
         print(t.draw())
+        print("\n" * (tsize.lines - len(t.draw().splitlines()) - 13))
+        print("Log:")
+        print(log_stream)
     start_listeners(on_receive)
 
 
