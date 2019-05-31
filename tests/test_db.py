@@ -6,10 +6,12 @@ def test_save_to_disk(tmp_path):
     DeviceTypeDB.devices_location = tmp_path
     assert len(DeviceTypeDB.get_db().device_types) == 0
     dt = DeviceType("test_device")
+    dt.add_characteristic("test", "R")
     DeviceTypeDB.get_db().add(dt)
     assert len(DeviceTypeDB.get_db().device_types) == 1
     DeviceTypeDB.db = None
     assert len(DeviceTypeDB.get_db().device_types) == 1
+    assert DeviceTypeDB.get_db().device_types.get(dt.uuid).characteristics == {("test", "R")}
 
 
 def test_find_matching_device(tmp_path):

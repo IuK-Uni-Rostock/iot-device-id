@@ -1,5 +1,5 @@
 import glob
-import pickle
+import json
 import logging
 import os
 import uuid
@@ -20,7 +20,23 @@ class DeviceType(CharacterisableMixin):
         self.uuid = str(uuid.uuid4())
 
     def __str__(self):
-        return "DeviceType(name={}, uuid={})".format(self.name, self.uuid)
+        return "DeviceType(name={}, uuid={}, characteristics=[{}])".format(
+            self.name, self.uuid, len(self.characteristics))
+
+    def serialise(self, f):
+        return json.dump({
+            "name": self.name,
+            "characteristics": self.characteristics
+        }, f)
+
+    @staticmethod
+    def deserialise(f):
+        data = json.load(f)
+        dt = DeviceType(data.name)
+        for c in data["characteristics"]:
+            assert type(c[0]) == str == type(c[1])
+            dt.add_characteristic(c[0], c[1])
+        return dt
 
 
 class LocalDevice(CharacterisableMixin):
@@ -47,7 +63,7 @@ class DeviceTypeDB(object):
         devices = {}
         for d in glob.glob("{}/*".format(DeviceTypeDB.devices_location)):
             with open(d, "rb") as f:
-                device = pickle.load(f)
+                device = DeviceType.deserialise(f)
                 devices[device.uuid] = device
         return devices
 
@@ -75,4 +91,4 @@ class DeviceTypeDB(object):
     def add(self, device_type: DeviceType):
         self.device_types[device_type.uuid] = device_type
         with open("{}/{}".format(self.devices_location, device_type.uuid), "wb") as f:
-            pickle.dump(device_type, f)
+            device_type.serialise(f)
