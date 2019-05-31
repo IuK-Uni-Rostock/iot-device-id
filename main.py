@@ -1,10 +1,10 @@
 import asyncio
 import logging
-import shutil
+import sys
 
 import click
 
-from lib.discovery import ssdp, dns, mdns, arp
+from lib.discovery import ssdp, dns, mdns, arp, port_scan
 from lib.device_db import DeviceType, DeviceTypeDB, LocalDevice
 from lib.utils import LogStream, TexttableWithLogStream
 
@@ -13,11 +13,16 @@ logging.basicConfig(level=logging.DEBUG, stream=log_stream, format="%(asctime)s;
 
 
 def start_listeners(on_receive):
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(dns.start(on_receive))
-    loop.run_until_complete(ssdp.start(on_receive))
-    loop.run_until_complete(mdns.start(on_receive))
-    loop.run_until_complete(arp.start(on_receive))
+    if sys.platform == 'win32':
+        loop = asyncio.ProactorEventLoop()
+        asyncio.set_event_loop(loop)
+    else:
+        loop = asyncio.get_event_loop()
+    loop.create_task(dns.start(on_receive))
+    loop.create_task(ssdp.start(on_receive))
+    loop.create_task(mdns.start(on_receive))
+    loop.create_task(port_scan.start(on_receive))
+    loop.create_task(arp.start(on_receive))
 
     loop.run_forever()
 
@@ -33,13 +38,14 @@ def cli():
 def record(ip, name):
     """Record a new device into the database."""
     device_type = DeviceType(name)
+    LocalDevice.local_devices[ip] = LocalDevice(ip)
 
     def on_receive(remote_ip, type, record):
         t = TexttableWithLogStream(log_stream, ["", "Type", "Record"])
         if isinstance(remote_ip, bytes):
             remote_ip = remote_ip.decode("utf8")
         if remote_ip != ip:
-            logging.debug("Ignoring record from {} (!= {})".format(remote_ip, ip))
+            logging.debug("Ignoring {} record from {} (!= {})".format(type, remote_ip, ip))
         else:
             device_type.add_characteristic(type, record)
             DeviceTypeDB.get_db().add(device_type)
@@ -54,16 +60,17 @@ def record(ip, name):
 @click.command()
 def detect():
     """Detect IoT devices on the local network."""
-    local_devices = {}
-
     def on_receive(remote_ip, type, record):
+        if isinstance(remote_ip, bytes):
+            remote_ip = remote_ip.decode("utf8")
+        logging.info("Received {} record '{}' for device at {}".format(type, record, remote_ip))
         t = TexttableWithLogStream(log_stream, ["", "Local IP address", "Device Type", "Match"])
-        if remote_ip not in local_devices:
-            local_devices[remote_ip] = LocalDevice(remote_ip)
-        local_devices[remote_ip].add_characteristic(type, record)
-        local_devices[remote_ip].device_types = DeviceTypeDB.get_db().find_matching_device_types(local_devices[remote_ip])
+        if remote_ip not in LocalDevice.local_devices:
+            LocalDevice.local_devices[remote_ip] = LocalDevice(remote_ip)
+        LocalDevice.local_devices[remote_ip].add_characteristic(type, record)
+        LocalDevice.local_devices[remote_ip].device_types = DeviceTypeDB.get_db().find_matching_device_types(LocalDevice.local_devices[remote_ip])
 
-        for i, (ip, ld) in enumerate(local_devices.items()):
+        for i, (ip, ld) in enumerate(LocalDevice.local_devices.items()):
             # If likelihood is > 0
             if len(ld.device_types) and ld.device_types[0][0] > 0:
                 dt = ld.device_types[0]

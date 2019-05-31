@@ -9,7 +9,6 @@ async def start(on_receive, port=53):
 
         async def handle(self, data, addr):
             msg = DNSMessage.parse(data)
-            logging.debug("DNS Request for {} from {}".format(msg.qd, addr))
             on_receive(addr[0], "DNS", str(msg.qd[0]))
 
             # Send a response:

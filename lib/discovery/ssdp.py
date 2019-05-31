@@ -10,7 +10,6 @@ async def start(on_receive):
 
         def response_received(self, response, addr):
             on_receive(addr, "SSDP", response)
-            logging.debug("SSDP Response for {} from {}".format(response, addr))
 
         def request_received(self, request, addr):
             logging.debug("SSDP Request for {} from {}".format(request, addr))
