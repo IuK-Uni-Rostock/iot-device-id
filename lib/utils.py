@@ -1,8 +1,12 @@
 import asyncio
 import os
 import re
+import shutil
 from asyncio.subprocess import create_subprocess_exec
 from collections import deque
+
+import click
+from texttable import Texttable
 
 
 async def get_arp_table():
@@ -36,3 +40,25 @@ class LogStream(object):
 
     def __str__(self):
         return "".join(self.logs)
+
+
+class TexttableWithLogStream(object):
+    def __init__(self, log_stream, headers):
+        self.log_stream = log_stream
+        self.headers = headers
+        self.t = Texttable()
+        self.t.header(self.headers)
+
+    def add_row(self, items):
+        self.t.add_row(items)
+
+    def draw(self):
+        click.clear()
+        tsize = shutil.get_terminal_size((80, 20))
+        self.t.set_max_width(tsize.columns)
+        print(self.t.draw())
+        print("\n" * (tsize.lines - len(self.t.draw().splitlines()) - 13))
+        print("Log:")
+        print(self.log_stream)
+        self.t = Texttable()
+        self.t.header(self.headers)

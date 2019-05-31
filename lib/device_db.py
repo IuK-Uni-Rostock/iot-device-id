@@ -26,7 +26,7 @@ class DeviceType(CharacterisableMixin):
     def serialise(self, f):
         return json.dump({
             "name": self.name,
-            "characteristics": self.characteristics
+            "characteristics": list(self.characteristics)
         }, f)
 
     @staticmethod

@@ -3,12 +3,10 @@ import logging
 import shutil
 
 import click
-from texttable import Texttable
 
 from lib.discovery import ssdp, dns, mdns, arp
 from lib.device_db import DeviceType, DeviceTypeDB, LocalDevice
-from lib.utils import LogStream
-
+from lib.utils import LogStream, TexttableWithLogStream
 
 log_stream = LogStream()
 logging.basicConfig(level=logging.DEBUG, stream=log_stream, format="%(asctime)s;%(levelname)s;%(message)s")
@@ -37,12 +35,16 @@ def record(ip, name):
     device_type = DeviceType(name)
 
     def on_receive(remote_ip, type, record):
+        t = TexttableWithLogStream(log_stream, ["", "Type", "Record"])
         if remote_ip != ip:
             logging.debug("Ignoring request from {} (!= {})".format(remote_ip, ip))
-            return
-        device_type.add_characteristic(type, record)
-        DeviceTypeDB.get_db().add(device_type)
-        logging.info("Saving {} record '{}' for device type {}".format(type, record, device_type))
+        else:
+            device_type.add_characteristic(type, record)
+            DeviceTypeDB.get_db().add(device_type)
+            logging.info("Saving {} record '{}' for device type {}".format(type, record, device_type))
+        for i, c in enumerate(device_type.characteristics):
+            t.add_row([i+1, c[0], c[1]])
+        t.draw()
 
     start_listeners(on_receive)
 
@@ -53,24 +55,18 @@ def detect():
     local_devices = {}
 
     def on_receive(remote_ip, type, record):
-        tsize = shutil.get_terminal_size((80, 20))
-        t = Texttable()
-        t.set_max_width(tsize.columns)
+        t = TexttableWithLogStream(log_stream, ["", "Local IP address", "Device Type", "Match"])
         if remote_ip not in local_devices:
             local_devices[remote_ip] = LocalDevice(remote_ip)
         local_devices[remote_ip].add_characteristic(type, record)
         local_devices[remote_ip].device_types = DeviceTypeDB.get_db().find_matching_device_types(local_devices[remote_ip])
-        click.clear()
-        t.header(["", "Local IP address", "Device Type", "Match"])
+
         for i, (ip, ld) in enumerate(local_devices.items()):
             # If likelihood is > 0
             if len(ld.device_types) and ld.device_types[0][0] > 0:
                 dt = ld.device_types[0]
                 t.add_row(["#{}".format(i+1), ip, dt[1], "{}%".format(int(dt[0] * 100))])
-        print(t.draw())
-        print("\n" * (tsize.lines - len(t.draw().splitlines()) - 13))
-        print("Log:")
-        print(log_stream)
+        t.draw()
     start_listeners(on_receive)
 
 
