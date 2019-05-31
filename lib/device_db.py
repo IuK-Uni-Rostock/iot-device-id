@@ -32,7 +32,7 @@ class DeviceType(CharacterisableMixin):
     @staticmethod
     def deserialise(f):
         data = json.load(f)
-        dt = DeviceType(data.name)
+        dt = DeviceType(data["name"])
         for c in data["characteristics"]:
             assert type(c[0]) == str == type(c[1])
             dt.add_characteristic(c[0], c[1])
@@ -64,7 +64,7 @@ class DeviceTypeDB(object):
         for d in glob.glob("{}/*".format(DeviceTypeDB.devices_location)):
             with open(d, "r") as f:
                 device = DeviceType.deserialise(f)
-                devices[device.uuid] = device
+                devices[os.path.basename(d)] = device
         return devices
 
     @staticmethod

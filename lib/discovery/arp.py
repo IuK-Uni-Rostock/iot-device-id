@@ -13,7 +13,7 @@ async def start(on_receive):
         for elem in arp_table:
             try:
                 vendor = await mac.lookup(elem[1])
-                on_receive(elem[0], "MAC", vendor)
+                on_receive(elem[0], "Vendor", vendor)
                 logging.info("Vendor for {} is {}".format(elem[0], vendor))
             except KeyError:
                 pass

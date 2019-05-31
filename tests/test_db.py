@@ -11,6 +11,7 @@ def test_save_to_disk(tmp_path):
     assert len(DeviceTypeDB.get_db().device_types) == 1
     DeviceTypeDB.db = None
     assert len(DeviceTypeDB.get_db().device_types) == 1
+    print(DeviceTypeDB.get_db().device_types, dt)
     assert DeviceTypeDB.get_db().device_types.get(dt.uuid).characteristics == {("test", "R")}
 
 

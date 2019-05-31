@@ -36,8 +36,10 @@ def record(ip, name):
 
     def on_receive(remote_ip, type, record):
         t = TexttableWithLogStream(log_stream, ["", "Type", "Record"])
+        if isinstance(remote_ip, bytes):
+            remote_ip = remote_ip.decode("utf8")
         if remote_ip != ip:
-            logging.debug("Ignoring request from {} (!= {})".format(remote_ip, ip))
+            logging.debug("Ignoring record from {} (!= {})".format(remote_ip, ip))
         else:
             device_type.add_characteristic(type, record)
             DeviceTypeDB.get_db().add(device_type)
