@@ -62,7 +62,7 @@ class DeviceTypeDB(object):
             os.mkdir(DeviceTypeDB.devices_location)
         devices = {}
         for d in glob.glob("{}/*".format(DeviceTypeDB.devices_location)):
-            with open(d, "rb") as f:
+            with open(d, "r") as f:
                 device = DeviceType.deserialise(f)
                 devices[device.uuid] = device
         return devices
@@ -90,5 +90,5 @@ class DeviceTypeDB(object):
 
     def add(self, device_type: DeviceType):
         self.device_types[device_type.uuid] = device_type
-        with open("{}/{}".format(self.devices_location, device_type.uuid), "wb") as f:
+        with open("{}/{}".format(self.devices_location, device_type.uuid), "w") as f:
             device_type.serialise(f)
