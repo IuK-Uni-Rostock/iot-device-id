@@ -3,3 +3,4 @@ click==7.0
 async-dns==1.0.0
 ssdp==1.0.1
 aiozeroconf==0.1.8
+mac_vendor_lookup==0.1.7
