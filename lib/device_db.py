@@ -34,12 +34,14 @@ class DeviceType(CharacterisableMixin):
         data = json.load(f)
         dt = DeviceType(data["name"])
         for c in data["characteristics"]:
-            assert type(c[0]) == str == type(c[1])
+            assert isinstance(c[0], str) and isinstance(c[1], str)
             dt.add_characteristic(c[0], c[1])
         return dt
 
 
 class LocalDevice(CharacterisableMixin):
+    local_devices = {}
+
     def __init__(self, ip):
         super().__init__()
         self.ip = ip
@@ -81,8 +83,9 @@ class DeviceTypeDB(object):
         result = []
         for device in self.device_types.values():
             intersection = len(device.characteristics.intersection(local_device.characteristics))
-            dice_index = 2 * intersection / (len(device.characteristics) + len(local_device.characteristics))
-            result.append((dice_index, device))
+            union = len(device.characteristics.union(local_device.characteristics))
+            jaccard_index = intersection / union
+            result.append((jaccard_index, device))
         return sorted(result, key=lambda x: x[0], reverse=True)
 
     def find_matching_device_type(self, local_device: LocalDevice) -> (float, DeviceType):
