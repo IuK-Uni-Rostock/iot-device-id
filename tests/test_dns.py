@@ -16,7 +16,7 @@ class Receiver:
 @pytest.mark.asyncio
 async def test_dns():
     r = Receiver()
-    await start(r.on_receive, port=5300)
+    await start(r, port=5300)
     proc = await asyncio.create_subprocess_shell(" ".join(["dig", "-p", "5300", "@localhost", "google.com", "A"]))
     await proc.wait()
     assert len(r.events) == 1
