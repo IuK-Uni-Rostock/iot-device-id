@@ -2,21 +2,26 @@ import asyncio
 import os
 import re
 import shutil
+import subprocess
 from asyncio.subprocess import create_subprocess_exec
 from collections import deque
+from threading import Thread
 
 import click
 from texttable import Texttable
 
 
 async def get_arp_table():
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, _get_arp_table_sync)
+
+
+def _get_arp_table_sync():
     if os.name == "nt":
         switch, drop_param = "-a", 2
     else:
         switch, drop_param = "-e", 1
-    proc = await create_subprocess_exec("arp", switch, stdout=asyncio.subprocess.PIPE)
-    await proc.wait()
-    arp_table = (await proc.stdout.read())
+    arp_table = subprocess.check_output(["arp", switch])
     arp_table = [l.split()[:3] for l in arp_table.splitlines() if len(l)]
     for elem in arp_table:
         elem.pop(drop_param)

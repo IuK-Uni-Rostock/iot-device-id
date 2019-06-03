@@ -20,7 +20,7 @@ async def check_port(ip, port):
         return False
 
 
-async def start(on_receive):
+async def start(parent):
     while True:
         # Wait for other services to find probable devices
         await asyncio.sleep(2)
@@ -29,6 +29,6 @@ async def start(on_receive):
             logging.info("Scanning {}".format(ip))
             for p in ports:
                 if await check_port(ip, p):
-                    on_receive(ip, "open port", "tcp/{}".format(p))
+                    parent.on_receive(ip, "open port", "tcp/{}".format(p))
                 await asyncio.sleep(0.5)
         await asyncio.sleep(60)

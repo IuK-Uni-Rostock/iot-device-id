@@ -5,11 +5,11 @@ import logging
 import ssdp
 
 
-async def start(on_receive):
+async def start(parent):
     class MyProtocol(ssdp.SimpleServiceDiscoveryProtocol):
 
         def response_received(self, response, addr):
-            on_receive(addr, "SSDP", response)
+            parent.on_receive(addr, "SSDP", response)
 
         def request_received(self, request, addr):
             logging.debug("SSDP Request for {} from {}".format(request, addr))

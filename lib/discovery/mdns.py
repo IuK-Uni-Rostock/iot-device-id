@@ -5,7 +5,7 @@ from aiozeroconf import ServiceBrowser, Zeroconf
 import aiozeroconf
 
 
-async def start(on_receive):
+async def start(parent):
     class DummyListener(object):
 
         def add_service(self, *_):
@@ -18,7 +18,7 @@ async def start(on_receive):
             for a in msg.answers:
                 typ = str(a).split(",")[-1][:-1]
                 src_addr = addrs[0]
-                on_receive(src_addr, "mDNS", typ)
+                parent.on_receive(src_addr, "mDNS", typ)
 
     # Monkey-patch aiozeroconf so we have access to the source IP
     aiozeroconf.aiozeroconf.MCListener = MyMCListener
