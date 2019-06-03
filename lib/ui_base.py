@@ -8,7 +8,7 @@ from lib.discovery import dns, ssdp, mdns, port_scan, arp
 from lib.utils import LogStream
 
 
-class Mode():
+class Mode:
     Record = 1
     Detect = 2
 

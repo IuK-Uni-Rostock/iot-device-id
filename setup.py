@@ -35,14 +35,15 @@ setup(
     packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
     install_requires=required,
     extras_require={
-        'dev': ['pytest-cov', 'coveralls', 'pytest-asyncio']
+        'dev': ['pytest-cov', 'coveralls', 'pytest-asyncio'],
+        'gui': ['PyQt5', 'quamash']
     },
     include_package_data=True,
     license='Apache',
     classifiers=[
         # Trove classifiers
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
-        'License :: OSI Approved :: Apache License',
+        'License :: OSI Approved :: GPL',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
