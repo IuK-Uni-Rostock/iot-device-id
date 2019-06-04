@@ -42,7 +42,6 @@ class BaseUI(object):
             LocalDevice.local_devices[remote_ip] = LocalDevice(remote_ip)
         LocalDevice.local_devices[remote_ip].add_characteristic(type, record)
         if self.mode == Mode.Record:
-            self.set_headers(["", "Type", "Record"])
             if remote_ip != self.recording_ip:
                 logging.debug("Ignoring {} record from {} (!= {})".format(type, remote_ip, self.recording_ip))
             else:
@@ -50,25 +49,26 @@ class BaseUI(object):
                 DeviceTypeDB.get_db().add(self.recording_device_type)
                 logging.info(
                     "Saving {} record '{}' for device type {}".format(type, record, self.recording_device_type))
-            for i, c in enumerate(self.recording_device_type.characteristics):
-                self.add_row([i + 1, c[0], c[1]])
+            for c in self.recording_device_type.characteristics:
+                self.add_row([c[0], c[1]])
             self.draw()
         if self.mode == Mode.Detect:
             self.sort_by_row(3)
             logging.info("Received {} record '{}' for device at {}".format(type, record, remote_ip))
-            self.set_headers(["", "Local IP address", "Device Type", "Match"])
 
             LocalDevice.local_devices[remote_ip].device_types = DeviceTypeDB.get_db().find_matching_device_types(
                 LocalDevice.local_devices[remote_ip])
 
-            for i, (ip, ld) in enumerate(LocalDevice.local_devices.items()):
+            for (ip, ld) in LocalDevice.local_devices.items():
                 # If likelihood is > 0
                 if len(ld.device_types) and ld.device_types[0][0] > 0:
                     dt = ld.device_types[0]
-                    self.add_row(["#{}".format(i + 1), ip, dt[1].name, "{}%".format(int(dt[0] * 100))])
+                    self.add_row([ip, dt[1].name, "{}%".format(int(dt[0] * 100))])
             self.draw()
 
     def start_recording(self, ip, name):
+        self.set_headers(["Type", "Record"])
+        self.draw()
         self.mode = Mode.Record
         self.recording_ip = ip
         self.recording_device_type = DeviceType(name)
@@ -81,6 +81,7 @@ class BaseUI(object):
 
     def start_detecting(self):
         self.mode = Mode.Detect
+        self.set_headers(["Local IP address", "Device Type", "Match"])
         self.start_listeners()
 
     def set_headers(self, headers):

@@ -1,8 +1,10 @@
 import asyncio
 import sys
 
+from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QApplication, QWidget, QTableWidget, QHBoxLayout, QTableWidgetItem
+from PyQt5.QtWidgets import QApplication, QWidget, QTableWidget, QTableWidgetItem, QPushButton, QVBoxLayout, \
+    QInputDialog, QDialog, QMessageBox, QHeaderView
 from quamash import QEventLoop
 
 from lib.ui_base import BaseUI
@@ -14,36 +16,77 @@ class QtUI(BaseUI):
         self.rows = []
         self.app = None
         self.tableWidget = None
+        self.start_button = None
+        self.stop_button = None
+        self.headers = []
 
     def run(self):
         self.app = QApplication(sys.argv)
 
         self.tableWidget = QTableWidget()
+        QTimer.singleShot(100, lambda: self.tableWidget.setHorizontalHeaderLabels(
+            self.headers))
+        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         w = QWidget()
-        l = QHBoxLayout()
+        l = QVBoxLayout()
         l.addWidget(self.tableWidget)
+
+        self.start_button = QPushButton("Add new device type")
+        self.start_button.clicked.connect(self.record)
+        self.start_button.setIcon(QIcon("lib/assets/start.png"))
+        l.addWidget(self.start_button)
+
+        self.stop_button = QPushButton("Stop recording")
+        self.stop_button.clicked.connect(self.stop_record)
+        self.stop_button.setIcon(QIcon("lib/assets/stop.png"))
+        self.stop_button.hide()
+        l.addWidget(self.stop_button)
+
         w.setLayout(l)
         w.setWindowTitle("IoT Device ID")
         w.setWindowIcon(QIcon("lib/assets/icons8-smart-home-checked.png"))
+        w.setMinimumHeight(300)
+        w.setMinimumWidth(500)
+
         w.show()
 
         self.start_detecting()
 
         sys.exit(app.exec_())
 
+    def record(self):
+        ip, success = QInputDialog.getText(self.tableWidget, "Which device should be recorded?",
+                                           "Please enter the device's IP address.")
+        if not success:
+            return
+        name, success = QInputDialog.getText(self.tableWidget, "Which device should be recorded?",
+                                             "Please enter the device name (e.g. Philips Hue Bridge v1)")
+        if not success:
+            return
+        self.stop_button.show()
+        self.start_button.hide()
+        self.start_recording(ip, name)
+
+    def stop_record(self):
+        QMessageBox.information(self.tableWidget, "Success", "Device has been successfully saved to the database.")
+        self.stop_button.hide()
+        self.start_button.show()
+        self.start_detecting()
+
     def set_headers(self, headers):
+        self.headers = headers
         self.tableWidget.setHorizontalHeaderLabels(headers)
         self.tableWidget.setColumnCount(len(headers))
 
     def add_row(self, values):
+        self.tableWidget.setVisible(True)
         self.rows.append(values)
 
     def draw(self):
         self.tableWidget.setRowCount(len(self.rows))
         for x, row in enumerate(self.rows):
             for y, value in enumerate(row):
-                print(x, y, value)
                 self.tableWidget.setItem(x, y, QTableWidgetItem(value))
         self.rows = []
 
