@@ -9,6 +9,8 @@ ports = (80, 443,  # HTTP
          1900,  # UPNP
          )
 
+enabled = True
+
 
 async def check_port(ip, port):
     loop = asyncio.get_event_loop()

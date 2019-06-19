@@ -1,11 +1,11 @@
 # noinspection PyArgumentList
 import asyncio
 import logging
+import re
 
 from lib.device_db import LocalDevice, DeviceTypeDB, DeviceType
 
 from lib.discovery import dns, ssdp, mdns, port_scan, arp
-from lib.utils import LogStream
 
 
 class Mode:
@@ -13,11 +13,9 @@ class Mode:
     Detect = 2
 
 
-log_stream = LogStream()
-logging.basicConfig(level=logging.DEBUG, stream=log_stream, format="%(asctime)s;%(levelname)s;%(message)s")
-
-
 class BaseUI(object):
+    listeners = (dns, ssdp, mdns, port_scan, arp)
+
     def __init__(self):
         self.recording_device_type = None
         self.recording_ip = None
@@ -28,12 +26,18 @@ class BaseUI(object):
         if self.listeners_started:
             return
         loop = asyncio.get_event_loop()
-        loop.create_task(dns.start(self))
-        loop.create_task(ssdp.start(self))
-        loop.create_task(mdns.start(self))
-        loop.create_task(port_scan.start(self))
-        loop.create_task(arp.start(self))
+        for l in BaseUI.listeners:
+            loop.create_task(l.start(self))
+
         loop.run_forever()
+
+    @staticmethod
+    def _get_disabled_listeners():
+        disabled = []
+        for l in BaseUI.listeners:
+            if not l.enabled:
+                disabled.append(l.__name__.split(".")[-1])
+        return disabled
 
     def on_receive(self, remote_ip, type, record):
         if isinstance(remote_ip, bytes):
@@ -57,12 +61,14 @@ class BaseUI(object):
             logging.info("Received {} record '{}' for device at {}".format(type, record, remote_ip))
 
             LocalDevice.local_devices[remote_ip].device_types = DeviceTypeDB.get_db().find_matching_device_types(
-                LocalDevice.local_devices[remote_ip])
+                LocalDevice.local_devices[remote_ip], ignore=BaseUI._get_disabled_listeners())
 
             for (ip, ld) in LocalDevice.local_devices.items():
                 # If likelihood is > 0
                 if len(ld.device_types) and ld.device_types[0][0] > 0:
                     dt = ld.device_types[0]
+                    if dt[0] < 50:
+                        dt[1] = "Unknown"
                     self.add_row([ip, dt[1].name, "{}%".format(int(dt[0] * 100))])
             self.draw()
 

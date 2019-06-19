@@ -75,17 +75,22 @@ class DeviceTypeDB(object):
             DeviceTypeDB.db = DeviceTypeDB()
         return DeviceTypeDB.db
 
-    def find_matching_device_types(self, local_device: LocalDevice) -> [(float, DeviceType)]:
+    def find_matching_device_types(self, local_device: LocalDevice, ignore=tuple()) -> [(float, DeviceType)]:
         """
         Returns the most likely device types ordered by similarity of characteristics with the device.
-        Uses the Sørensen–Dice coefficient to quantify the similarity.
+        Uses the Jaccard index to quantify the similarity.
         """
+
         result = []
-        for device in self.device_types.values():
-            intersection = len(device.characteristics.intersection(local_device.characteristics))
-            union = len(device.characteristics.union(local_device.characteristics))
+        for device_type in self.device_types.values():
+
+            # E.g. if DNS is not enabled, ignore all DNS records
+            dtc = set([c for c in device_type.characteristics if c[0] not in ignore])
+
+            intersection = len(dtc.intersection(local_device.characteristics))
+            union = len(dtc.union(local_device.characteristics))
             jaccard_index = intersection / union
-            result.append((jaccard_index, device))
+            result.append((jaccard_index, device_type))
         return sorted(result, key=lambda x: x[0], reverse=True)
 
     def find_matching_device_type(self, local_device: LocalDevice) -> (float, DeviceType):

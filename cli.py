@@ -1,7 +1,12 @@
+import logging
+
 import click
 
-from lib.ui_base import BaseUI, log_stream
-from lib.utils import TexttableWithLogStream
+from lib.ui_base import BaseUI
+from lib.utils import TexttableWithLogStream, LogStream
+
+log_stream = LogStream()
+logging.basicConfig(level=logging.DEBUG, stream=log_stream, format="%(asctime)s;%(levelname)s;%(message)s")
 
 
 class ConsoleUI(BaseUI):

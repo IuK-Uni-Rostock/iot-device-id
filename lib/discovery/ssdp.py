@@ -4,6 +4,8 @@ import logging
 
 import ssdp
 
+enabled = True
+
 
 async def start(parent):
     class MyProtocol(ssdp.SimpleServiceDiscoveryProtocol):

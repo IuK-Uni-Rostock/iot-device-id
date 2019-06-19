@@ -3,8 +3,12 @@ import logging
 from async_dns import DNSMessage
 from async_dns.server import DNSProtocol, DNSMixIn, DNSDatagramProtocol, DNSServer
 
+enabled = False
+
 
 async def start(parent, port=53):
+    global enabled
+
     class OurDNSMixIn(DNSMixIn):
 
         async def handle(self, data, addr):
@@ -26,6 +30,7 @@ async def start(parent, port=53):
         tcp_server, udp_transport = await server.start_server()
         if tcp_server:
             logging.debug("DNS server listening on 0.0.0.0 port 53/tcp")
+            enabled = True
         if udp_transport:
             logging.debug("DNS server listening on 0.0.0.0 port 53/udp")
     except PermissionError as e:

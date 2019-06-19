@@ -1,13 +1,16 @@
 import asyncio
+import logging
 import sys
 
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QWidget, QTableWidget, QTableWidgetItem, QPushButton, QVBoxLayout, \
-    QInputDialog, QDialog, QMessageBox, QHeaderView
+    QInputDialog, QMessageBox, QHeaderView, QLabel, QAbstractItemView
 from quamash import QEventLoop
 
 from lib.ui_base import BaseUI
+
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s;%(levelname)s;%(message)s")
 
 
 class QtUI(BaseUI):
@@ -19,17 +22,22 @@ class QtUI(BaseUI):
         self.start_button = None
         self.stop_button = None
         self.headers = []
+        self.heading = None
 
     def run(self):
         self.app = QApplication(sys.argv)
+
+        self.heading = QLabel("<h1>Local IoT devices</h1>")
 
         self.tableWidget = QTableWidget()
         QTimer.singleShot(100, lambda: self.tableWidget.setHorizontalHeaderLabels(
             self.headers))
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         w = QWidget()
         l = QVBoxLayout()
+        l.addWidget(self.heading)
         l.addWidget(self.tableWidget)
 
         self.start_button = QPushButton("Add new device type")
@@ -64,6 +72,7 @@ class QtUI(BaseUI):
                                              "Please enter the device name (e.g. Philips Hue Bridge v1)")
         if not success:
             return
+        self.heading.setText("<h1>Recording characteristics of {} device at {}</h1>".format(name, ip))
         self.stop_button.show()
         self.start_button.hide()
         self.start_recording(ip, name)
@@ -71,6 +80,7 @@ class QtUI(BaseUI):
     def stop_record(self):
         QMessageBox.information(self.tableWidget, "Success", "Device has been successfully saved to the database.")
         self.stop_button.hide()
+        self.heading.setText("<h1>Local IoT devices</h1>")
         self.start_button.show()
         self.start_detecting()
 

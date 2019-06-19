@@ -1,8 +1,9 @@
 import asyncio
-import logging
 
 from aiozeroconf import ServiceBrowser, Zeroconf
 import aiozeroconf
+
+enabled = True
 
 
 async def start(parent):
