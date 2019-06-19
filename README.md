@@ -57,7 +57,7 @@ registers.
 
 ### Command line interface
 
-## Detect Local Devices
+#### Detect Local Devices
 
 To detect local devices, simply run
 
@@ -65,7 +65,7 @@ To detect local devices, simply run
 
 
 
-## Record Device Information
+#### Record Device Information
 
 To add a new device into the database:
 
