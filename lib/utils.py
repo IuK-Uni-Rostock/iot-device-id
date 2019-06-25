@@ -3,12 +3,12 @@ import os
 import re
 import shutil
 import subprocess
-from asyncio.subprocess import create_subprocess_exec
 from collections import deque
-from threading import Thread
 
 import click
 from texttable import Texttable
+from fuzzywuzzy import process
+
 
 
 async def get_arp_table():
@@ -67,3 +67,7 @@ class TexttableWithLogStream(object):
         print(self.log_stream)
         self.t = Texttable()
         self.t.header(self.headers)
+
+
+def fuzzy_intersection(a, b):
+    return sum([process.extractOne(i, b)[1]/100 for i in a])

@@ -4,6 +4,8 @@ import logging
 import os
 import uuid
 
+from lib.utils import fuzzy_intersection
+
 
 class CharacterisableMixin(object):
     def __init__(self):
@@ -87,7 +89,7 @@ class DeviceTypeDB(object):
             # E.g. if DNS is not enabled, ignore all DNS records
             dtc = set([c for c in device_type.characteristics if c[0] not in ignore])
 
-            intersection = len(dtc.intersection(local_device.characteristics))
+            intersection = fuzzy_intersection(dtc, local_device.characteristics)
             union = len(dtc.union(local_device.characteristics))
             jaccard_index = intersection / union
             result.append((jaccard_index, device_type))
