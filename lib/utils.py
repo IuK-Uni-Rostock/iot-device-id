@@ -70,4 +70,9 @@ class TexttableWithLogStream(object):
 
 
 def fuzzy_intersection(a, b):
-    return sum([process.extractOne(i, b)[1]/100 for i in a])
+    s = 0
+    for elem in a:
+        m = process.extractOne(elem[1], [i[1] for i in b if i[0] == elem[0]])
+        if m:
+            s += m[1]/100
+    return s
