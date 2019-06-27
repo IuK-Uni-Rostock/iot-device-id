@@ -5,7 +5,7 @@ import re
 
 from lib.device_db import LocalDevice, DeviceTypeDB, DeviceType
 
-from lib.discovery import dns, ssdp, mdns, port_scan, arp, nupnp
+from lib.discovery import dns, ssdp, mdns, port_scan, arp, nupnp, ws_discovery
 
 
 class Mode:
@@ -14,7 +14,7 @@ class Mode:
 
 
 class BaseUI(object):
-    listeners = (dns, ssdp, mdns, port_scan, arp, nupnp)
+    listeners = (dns, ssdp, mdns, port_scan, arp, nupnp, ws_discovery)
 
     def __init__(self):
         self.recording_device_type = None

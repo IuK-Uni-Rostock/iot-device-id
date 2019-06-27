@@ -5,3 +5,4 @@ ssdp==1.0.1
 aiozeroconf==0.1.8
 mac_vendor_lookup==0.1.7
 fuzzywuzzy==0.17.0
+WSDiscovery==1.1.2

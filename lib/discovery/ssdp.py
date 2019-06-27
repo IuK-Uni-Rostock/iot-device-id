@@ -6,6 +6,8 @@ import logging
 SSDP_BROADCAST_PORT = 1900
 SSDP_BROADCAST_ADDR = "239.255.255.250"
 
+enabled = True
+
 
 async def start(parent):
     class SSDPProtocol(object):
