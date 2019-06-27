@@ -10,7 +10,7 @@ from quamash import QEventLoop
 
 from lib.ui_base import BaseUI
 
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)s;%(levelname)s;%(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s;%(levelname)s;%(message)s")
 
 
 class QtUI(BaseUI):

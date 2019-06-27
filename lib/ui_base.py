@@ -28,7 +28,7 @@ class BaseUI(object):
         loop = asyncio.get_event_loop()
         for l in BaseUI.listeners:
             loop.create_task(l.start(self))
-
+        self.listeners_started = True
         loop.run_forever()
 
     @staticmethod
@@ -67,8 +67,6 @@ class BaseUI(object):
                 # If likelihood is > 0
                 if len(ld.device_types) and ld.device_types[0][0] > 0:
                     dt = ld.device_types[0]
-                    if dt[0] < 50:
-                        dt[1] = "Unknown"
                     self.add_row([ip, dt[1].name, "{}%".format(int(dt[0] * 100))])
             self.draw()
 

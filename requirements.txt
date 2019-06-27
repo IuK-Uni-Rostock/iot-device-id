@@ -1,0 +1,4 @@
+texttable
+click==7.0
+async-dns==1.0.0
+ssdp==1.0.1
