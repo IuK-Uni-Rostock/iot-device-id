@@ -10,7 +10,13 @@ from quamash import QEventLoop
 
 from lib.ui_base import BaseUI
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s;%(levelname)s;%(message)s")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
+    handlers=[
+        logging.FileHandler("iot-device-id.log"),
+        logging.StreamHandler()
+    ])
 
 
 class QtUI(BaseUI):

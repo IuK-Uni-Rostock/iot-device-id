@@ -63,6 +63,13 @@ class BaseUI(object):
             LocalDevice.local_devices[remote_ip].device_types = DeviceTypeDB.get_db().find_matching_device_types(
                 LocalDevice.local_devices[remote_ip], ignore=BaseUI._get_disabled_listeners())
 
+            logging.info("Local device at {} has characteristics {}, matches {} with {}.".format(
+                remote_ip,
+                LocalDevice.local_devices[remote_ip].characteristics,
+                LocalDevice.local_devices[remote_ip].device_types[0][1].name,
+                LocalDevice.local_devices[remote_ip].device_types[0][0] * 100
+            ))
+
             for (ip, ld) in LocalDevice.local_devices.items():
                 # If likelihood is > 0
                 if len(ld.device_types) and ld.device_types[0][0] > 0:
