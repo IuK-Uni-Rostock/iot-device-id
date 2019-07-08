@@ -28,7 +28,7 @@ async def start(parent):
         # Wait for other services to find probable devices
         await asyncio.sleep(2)
         logging.info("Scanning {} devices".format(LocalDevice.local_devices))
-        for ip, _ in copy.copy(LocalDevice.local_devices.items()):
+        for ip, _ in list(LocalDevice.local_devices.items()):
             logging.info("Scanning {}".format(ip))
             for p in ports:
                 if await check_port(ip, p):

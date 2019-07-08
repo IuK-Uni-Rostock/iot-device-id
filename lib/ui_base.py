@@ -1,7 +1,6 @@
 # noinspection PyArgumentList
 import asyncio
 import logging
-import re
 
 from lib.device_db import LocalDevice, DeviceTypeDB, DeviceType
 

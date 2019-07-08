@@ -90,7 +90,7 @@ class DeviceTypeDB(object):
             dtc = set([c for c in device_type.characteristics if c[0] not in ignore])
 
             intersection = fuzzy_intersection(dtc, local_device.characteristics)
-            union = len(dtc.union(local_device.characteristics))
+            union = len(dtc) + len(local_device.characteristics) - intersection
             jaccard_index = intersection / union
             result.append((jaccard_index, device_type))
         return sorted(result, key=lambda x: x[0], reverse=True)

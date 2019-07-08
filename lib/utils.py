@@ -7,8 +7,7 @@ from collections import deque
 
 import click
 from texttable import Texttable
-from fuzzywuzzy import process
-
+from textdistance import levenshtein
 
 
 async def get_arp_table():
@@ -72,7 +71,8 @@ class TexttableWithLogStream(object):
 def fuzzy_intersection(a, b):
     s = 0
     for elem in a:
-        m = process.extractOne(elem[1], [i[1] for i in b if i[0] == elem[0]])
+        m = max([levenshtein.normalized_similarity(elem[1], i[1]) for i in b if i[0] == elem[0]])
+
         if m:
-            s += m[1]/100
+            s += m
     return s
