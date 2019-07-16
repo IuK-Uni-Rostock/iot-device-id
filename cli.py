@@ -1,12 +1,26 @@
 import logging
+import os
 
 import click
 
 from lib.ui_base import BaseUI
 from lib.utils import TexttableWithLogStream, LogStream
 
+
+if "LOG_FILE" in os.environ:
+    log_file = os.environ["LOG_FILE"]
+else:
+    log_file = "iot-device-id.log"
+
 log_stream = LogStream()
-logging.basicConfig(level=logging.DEBUG, stream=log_stream, format="%(asctime)s;%(levelname)s;%(message)s")
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
+    handlers=[
+        logging.FileHandler(log_file),
+        logging.StreamHandler(log_stream)
+    ])
 
 
 class ConsoleUI(BaseUI):
@@ -26,7 +40,7 @@ class ConsoleUI(BaseUI):
         self.rows.append(values)
 
     def draw(self):
-        rows = sorted(self.rows, key=lambda x: int(x[self.sort_by][:-1]), reverse=True)
+        rows = self.rows
         self.rows = []
         for v in rows:
             self.tt.add_row(v)

@@ -1,5 +1,6 @@
 # noinspection PyArgumentList
 import asyncio
+import json
 import logging
 
 from lib.device_db import LocalDevice, DeviceTypeDB, DeviceType
@@ -64,7 +65,7 @@ class BaseUI(object):
 
             logging.info("Local device at {} has characteristics {}, matches {} with {}.".format(
                 remote_ip,
-                LocalDevice.local_devices[remote_ip].characteristics,
+                json.dumps(list(LocalDevice.local_devices[remote_ip].characteristics)),
                 LocalDevice.local_devices[remote_ip].device_types[0][1].name,
                 LocalDevice.local_devices[remote_ip].device_types[0][0] * 100
             ))
@@ -82,6 +83,7 @@ class BaseUI(object):
         self.mode = Mode.Record
         self.recording_ip = ip
         self.recording_device_type = DeviceType(name)
+        logging.info("Recording for device type: {} at {}".format(str(self.recording_device_type), ip))
         if ip not in LocalDevice.local_devices:
             LocalDevice.local_devices[ip] = LocalDevice(ip)
         else:

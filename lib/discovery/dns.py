@@ -5,6 +5,8 @@ from async_dns.server import DNSProtocol, DNSMixIn, DNSDatagramProtocol, DNSServ
 
 enabled = False
 
+logging.getLogger("async_dns").setLevel(logging.CRITICAL)
+
 
 async def start(parent, port=53):
     global enabled
@@ -16,7 +18,10 @@ async def start(parent, port=53):
             parent.on_receive(addr[0], "DNS", str(msg.qd[0]))
 
             # Send a response:
-            await super().handle(data, addr)
+            try:
+                await super().handle(data, addr)
+            except TypeError:
+                pass
 
     class OurDNSProtocol(OurDNSMixIn, DNSProtocol):
         pass

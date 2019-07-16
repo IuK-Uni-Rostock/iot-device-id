@@ -34,7 +34,7 @@ def validate_mac(mac):
 
 class LogStream(object):
     def __init__(self):
-        self.logs = deque(maxlen=15)
+        self.logs = deque(maxlen=5)
 
     def write(self, str):
         self.logs.append(str)
@@ -69,10 +69,11 @@ class TexttableWithLogStream(object):
 
 
 def fuzzy_intersection(a, b):
+    if len(a) > len(b):
+        a, b = b, a
     s = 0
     for elem in a:
-        m = max([levenshtein.normalized_similarity(elem[1], i[1]) for i in b if i[0] == elem[0]])
-
+        m = max([levenshtein.normalized_similarity(elem[1], i[1]) for i in b if i[0] == elem[0]] + [0])
         if m:
             s += m
     return s

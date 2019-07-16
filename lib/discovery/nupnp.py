@@ -16,8 +16,8 @@ async def start(parent):
         for e in ENDPOINTS:
             clients = await get_json(e)
             for c in clients:
-                ip = c["internaladdress"]
-                name = c["name"]
+                ip = c["internalipaddress"]
+                name = c["name"] if "name" in c else "None"
                 parent.on_receive(ip, "NUPNP", name)
         await asyncio.sleep(60 * 60)
 
